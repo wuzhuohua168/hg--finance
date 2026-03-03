@@ -6,24 +6,95 @@
 <title>HG Investing 工作台 Pro</title>
 
 <script src="https://s3.tradingview.com/tv.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{background:#f0f3f7;font-family:-apple-system,sans-serif;height:100dvh;display:flex;flex-direction:column;overflow:hidden;}
-.main{flex:1;display:flex;flex-direction:column;}
-.control-panel{background:#fff;padding:10px;border-bottom:1px solid #eee;}
-.chart-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
-.chart-btn{background:#f1f3f6;border:none;padding:8px;font-size:12px;border-radius:6px;cursor:pointer;}
-.chart-btn:hover{background:#4a90e2;color:#fff;}
-input{padding:8px;border-radius:6px;border:1px solid #ddd;}
-#stock-chart-container{width:100%;position:relative;}
-#download-chart{background:#4a90e2;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;margin-top:6px;}
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+body{
+    background:#f0f3f7;
+    font-family:-apple-system,sans-serif;
+    height:100vh;
+    height:100dvh;   /* 兼容 iPad */
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+}
+
+/* 主区域 */
+.main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+
+/* 控制区 */
+.control-panel{
+    background:#fff;
+    padding:10px;
+    border-bottom:1px solid #eee;
+}
+
+/* 快捷按钮 */
+.chart-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:6px;
+    margin-bottom:10px;
+}
+
+.chart-btn{
+    background:#f1f3f6;
+    border:none;
+    padding:8px;
+    font-size:12px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.chart-btn:hover{
+    background:#4a90e2;
+    color:#fff;
+}
+
+input{
+    padding:8px;
+    border-radius:6px;
+    border:1px solid #ddd;
+}
+
+/* 图表区域 */
+#stock-chart-container{
+    flex:1;
+    width:100%;
+    position:relative;
+}
+
+/* 复制图表按钮 */
+#copy-chart{
+    background:#4a90e2;
+    color:#fff;
+    border:none;
+    padding:6px 12px;
+    border-radius:6px;
+    cursor:pointer;
+    margin-top:6px;
+}
 </style>
 </head>
 
 <body>
+
 <div class="main">
+
+    <!-- 控制区 -->
     <div class="control-panel">
+
         <div class="chart-grid">
             <button onclick="loadChart('DXY')" class="chart-btn">DXY</button>
             <button onclick="loadChart('XAUUSD')" class="chart-btn">XAUUSD</button>
@@ -41,28 +112,23 @@ input{padding:8px;border-radius:6px;border:1px solid #ddd;}
 
         <div style="display:flex; gap:5px;">
             <input type="text" id="stock-search" placeholder="自定义代码 如 BTCUSDT" style="flex:1;">
-            <button onclick="updateStockChart()" style="background:#4a90e2;color:#fff;border:none;padding:0 15px;border-radius:8px;">查看</button>
+            <button onclick="updateStockChart()" 
+            style="background:#4a90e2;color:#fff;border:none;padding:0 15px;border-radius:8px;">
+            查看
+            </button>
         </div>
 
-        <button id="download-chart">下载图表</button>
+        <button id="copy-chart">复制图表到剪贴板</button>
+
     </div>
 
+    <!-- 图表 -->
     <div id="stock-chart-container"></div>
+
 </div>
 
 <script>
 let tvWidget = null;
-
-// 计算图表容器高度，避免iPad时间轴被遮挡
-function resizeChartContainer(){
-    const vh = window.innerHeight;
-    const controlHeight = document.querySelector('.control-panel').offsetHeight;
-    const chartContainer = document.getElementById('stock-chart-container');
-    chartContainer.style.height = (vh - controlHeight - 20) + 'px'; // 留20px底部间距
-}
-
-window.addEventListener('resize', resizeChartContainer);
-window.addEventListener('load', resizeChartContainer);
 
 // 加载图表
 function loadChart(symbol){
@@ -72,7 +138,10 @@ function loadChart(symbol){
 
 // 更新图表
 function updateStockChart(symbolInput){
-    const symbol = symbolInput || document.getElementById('stock-search').value || "XAUUSD/UKOIL";
+    const symbol = symbolInput || 
+                   document.getElementById('stock-search').value || 
+                   "XAUUSD/UKOIL";
+
     document.getElementById('stock-chart-container').innerHTML = '';
 
     tvWidget = new TradingView.widget({
@@ -88,30 +157,38 @@ function updateStockChart(symbolInput){
         hide_top_toolbar:false,
         hide_side_toolbar:false,
         hide_legend:false,
-        save_image:true,  // 保留官方快照按钮
+        save_image:false,  // 关闭默认相机，避免跳转
         container_id:"stock-chart-container",
         studies:["RSI@tv-basicstudies"]
     });
 }
 
-// 页面默认加载
+// 页面加载默认图表
 window.onload = function(){
     loadChart("UKOIL");
 };
 
-// 自定义下载按钮
-document.getElementById('download-chart').addEventListener('click', async function() {
-    if(!tvWidget) return alert("图表未加载完成");
+// 复制图表按钮
+document.getElementById('copy-chart').addEventListener('click', async function() {
+    const container = document.getElementById('stock-chart-container');
+
     try {
-        const url = await tvWidget.takeScreenshot(); // Base64图片URL
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'chart.png';
-        a.click();
+        const canvas = await html2canvas(container, {useCORS:true});
+        canvas.toBlob(async function(blob) {
+            try {
+                await navigator.clipboard.write([
+                    new ClipboardItem({ "image/png": blob })
+                ]);
+                alert("图表已复制到剪贴板！");
+            } catch (err) {
+                alert("复制失败：" + err);
+            }
+        });
     } catch(e){
-        alert("下载失败，请使用官方相机按钮：" + e);
+        alert("截图失败，可能是跨域iframe限制！");
     }
 });
 </script>
+
 </body>
 </html>
