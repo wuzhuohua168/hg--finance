@@ -19,7 +19,7 @@ body{
     background:#f0f3f7;
     font-family:-apple-system,sans-serif;
     height:100vh;
-    height:100dvh;   /* ✅ 关键：解决 iPad 时间轴问题 */
+    height:100dvh;   /* 兼容 iPad */
     display:flex;
     flex-direction:column;
     overflow:hidden;
@@ -72,30 +72,6 @@ input{
     flex:1;
     width:100%;
 }
-
-/* 底部Tab */
-.tab-bar{
-    height:60px;
-    background:#fff;
-    display:flex;
-    border-top:1px solid #e0e0e0;
-}
-
-.tab-item{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    color:#4a90e2;
-    font-size:10px;
-    font-weight:bold;
-}
-
-.tab-icon{
-    font-size:20px;
-    margin-bottom:2px;
-}
 </style>
 </head>
 
@@ -112,10 +88,10 @@ input{
             <button onclick="loadChart('XAGUSD')" class="chart-btn">XAGUSD</button>
             <button onclick="loadChart('COPPER')" class="chart-btn">COPPER</button>
             <button onclick="loadChart('UKOIL')" class="chart-btn">UKOIL</button>
-            <button onclick="loadChart('XAUUSD/XAGUSD')" class="chart-btn">金银比</button>
-            <button onclick="loadChart('XAUUSD/UKOIL')" class="chart-btn">金油比</button>
-            <button onclick="loadChart('COPPER/UKOIL')" class="chart-btn">铜油比</button>
-            <button onclick="loadChart('JPYCNY')" class="chart-btn">JPY/CNY</button>
+            <button onclick="loadChart('XAUUSD/TVC:UKOIL')" class="chart-btn">金油比</button>
+            <button onclick="loadChart('XAGUSD/TVC:UKOIL')" class="chart-btn">银油比</button>
+            <button onclick="loadChart('COPPER/TVC:UKOIL')" class="chart-btn">铜油比</button>
+            <button onclick="loadChart('CNYJPY')" class="chart-btn">CNY/JPY</button>
         </div>
 
         <div style="display:flex;gap:5px;">
@@ -131,14 +107,6 @@ input{
     <!-- 图表 -->
     <div id="stock-chart-container"></div>
 
-</div>
-
-<!-- 底部导航 -->
-<div class="tab-bar">
-    <div class="tab-item">
-        <span class="tab-icon">📈</span>
-        <span>宏观面板</span>
-    </div>
 </div>
 
 <script>
