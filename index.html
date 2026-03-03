@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HG Investing 工作台 Pro</title>
 
-<script src="https://s3.tradingview.com/tv.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<!-- 使用 TradingView 官方稳定地址 -->
+<script src="https://www.tradingview.com/tv.js"></script>
 
 <style>
 *{
@@ -20,7 +20,7 @@ body{
     background:#f0f3f7;
     font-family:-apple-system,sans-serif;
     height:100vh;
-    height:100dvh;   /* 兼容 iPad */
+    height:100dvh;   /* iPad 兼容 */
     display:flex;
     flex-direction:column;
     overflow:hidden;
@@ -72,18 +72,6 @@ input{
 #stock-chart-container{
     flex:1;
     width:100%;
-    position:relative;
-}
-
-/* 复制图表按钮 */
-#copy-chart{
-    background:#4a90e2;
-    color:#fff;
-    border:none;
-    padding:6px 12px;
-    border-radius:6px;
-    cursor:pointer;
-    margin-top:6px;
 }
 </style>
 </head>
@@ -101,24 +89,22 @@ input{
             <button onclick="loadChart('XAGUSD')" class="chart-btn">XAGUSD</button>
             <button onclick="loadChart('COPPER')" class="chart-btn">COPPER</button>
             <button onclick="loadChart('UKOIL')" class="chart-btn">UKOIL</button>
-            <button onclick="loadChart('BTCUSD')" class="chart-btn">BTCUSD</button>
+            <button onclick="loadChart('BTCUSDT')" class="chart-btn">BTCUSD</button>
             <button onclick="loadChart('XAUUSD/XAGUSD')" class="chart-btn">金银比</button>
             <button onclick="loadChart('XAUUSD/UKOIL')" class="chart-btn">金油比</button>
             <button onclick="loadChart('COPPER/UKOIL')" class="chart-btn">铜油比</button>              
-            <button onclick="loadChart('XAUUSD/BTCUSD')" class="chart-btn">金币比</button>  
+            <button onclick="loadChart('OANDA:XAUUSD/BINANCE:BTCUSDT')" class="chart-btn">金币比</button>  
             <button onclick="loadChart('USDCNY')" class="chart-btn">USDCNY</button>
             <button onclick="loadChart('JPYCNY')" class="chart-btn">JPYCNY</button>
         </div>
 
-        <div style="display:flex; gap:5px;">
+        <div style="display:flex;gap:5px;">
             <input type="text" id="stock-search" placeholder="自定义代码 如 BTCUSDT" style="flex:1;">
             <button onclick="updateStockChart()" 
             style="background:#4a90e2;color:#fff;border:none;padding:0 15px;border-radius:8px;">
             查看
             </button>
         </div>
-
-        <button id="copy-chart">复制图表到剪贴板</button>
 
     </div>
 
@@ -128,38 +114,38 @@ input{
 </div>
 
 <script>
-let tvWidget = null;
-
-// 加载图表
 function loadChart(symbol){
     document.getElementById('stock-search').value = symbol;
     updateStockChart(symbol);
 }
 
-// 更新图表
 function updateStockChart(symbolInput){
     const symbol = symbolInput || 
                    document.getElementById('stock-search').value || 
-                   "XAUUSD/UKOIL";
+                   "XAUUSD";
 
+    // 清空旧图表
     document.getElementById('stock-chart-container').innerHTML = '';
 
-    tvWidget = new TradingView.widget({
-        autosize:true,
-        symbol:symbol,
-        interval:"D",
-        timezone:"Etc/UTC",
-        theme:"light",
-        style:"1",
-        locale:"zh_CN",
-        toolbar_bg:"#f1f3f6",
-        enable_publishing:false,
-        hide_top_toolbar:false,
-        hide_side_toolbar:false,
-        hide_legend:false,
-        save_image:false,  // 关闭默认相机，避免跳转
-        container_id:"stock-chart-container",
-        studies:["RSI@tv-basicstudies"]
+    // 创建新图表
+    new TradingView.widget({
+        autosize: true,
+        symbol: symbol,
+        interval: "D",
+        timezone: "Etc/UTC",
+        theme: "light",
+        style: "1",
+        locale: "zh_CN",
+
+        toolbar_bg: "#f1f3f6",
+        enable_publishing: false,
+        hide_top_toolbar: false,
+        hide_side_toolbar: false,
+        hide_legend: false,
+        allow_symbol_change: true,
+        save_image: true,
+        container_id: "stock-chart-container",
+        studies: ["RSI@tv-basicstudies"]
     });
 }
 
@@ -167,7 +153,6 @@ function updateStockChart(symbolInput){
 window.onload = function(){
     loadChart("UKOIL");
 };
-
 </script>
 
 </body>
