@@ -168,26 +168,6 @@ window.onload = function(){
     loadChart("UKOIL");
 };
 
-// 复制图表按钮
-document.getElementById('copy-chart').addEventListener('click', async function() {
-    const container = document.getElementById('stock-chart-container');
-
-    try {
-        const canvas = await html2canvas(container, {useCORS:true});
-        canvas.toBlob(async function(blob) {
-            try {
-                await navigator.clipboard.write([
-                    new ClipboardItem({ "image/png": blob })
-                ]);
-                alert("图表已复制到剪贴板！");
-            } catch (err) {
-                alert("复制失败：" + err);
-            }
-        });
-    } catch(e){
-        alert("截图失败，可能是跨域iframe限制！");
-    }
-});
 </script>
 
 </body>
