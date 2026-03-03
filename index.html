@@ -6,6 +6,7 @@
 <title>HG Investing 工作台 Pro</title>
 
 <script src="https://s3.tradingview.com/tv.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style>
 *{
@@ -71,6 +72,18 @@ input{
 #stock-chart-container{
     flex:1;
     width:100%;
+    position:relative;
+}
+
+/* 复制图表按钮 */
+#copy-chart{
+    background:#4a90e2;
+    color:#fff;
+    border:none;
+    padding:6px 12px;
+    border-radius:6px;
+    cursor:pointer;
+    margin-top:6px;
 }
 </style>
 </head>
@@ -88,7 +101,7 @@ input{
             <button onclick="loadChart('XAGUSD')" class="chart-btn">XAGUSD</button>
             <button onclick="loadChart('COPPER')" class="chart-btn">COPPER</button>
             <button onclick="loadChart('UKOIL')" class="chart-btn">UKOIL</button>
-           <button onclick="loadChart('BTCUSD')" class="chart-btn">BTCUSD</button>
+            <button onclick="loadChart('BTCUSD')" class="chart-btn">BTCUSD</button>
             <button onclick="loadChart('XAUUSD/XAGUSD')" class="chart-btn">金银比</button>
             <button onclick="loadChart('XAUUSD/UKOIL')" class="chart-btn">金油比</button>
             <button onclick="loadChart('COPPER/UKOIL')" class="chart-btn">铜油比</button>              
@@ -97,13 +110,15 @@ input{
             <button onclick="loadChart('JPYCNY')" class="chart-btn">JPYCNY</button>
         </div>
 
-        <div style="display:flex;gap:5px;">
+        <div style="display:flex; gap:5px;">
             <input type="text" id="stock-search" placeholder="自定义代码 如 BTCUSDT" style="flex:1;">
             <button onclick="updateStockChart()" 
             style="background:#4a90e2;color:#fff;border:none;padding:0 15px;border-radius:8px;">
             查看
             </button>
         </div>
+
+        <button id="copy-chart">复制图表到剪贴板</button>
 
     </div>
 
@@ -113,21 +128,23 @@ input{
 </div>
 
 <script>
+let tvWidget = null;
 
+// 加载图表
 function loadChart(symbol){
     document.getElementById('stock-search').value = symbol;
     updateStockChart(symbol);
 }
 
+// 更新图表
 function updateStockChart(symbolInput){
-
     const symbol = symbolInput || 
                    document.getElementById('stock-search').value || 
                    "XAUUSD/UKOIL";
 
     document.getElementById('stock-chart-container').innerHTML = '';
 
-    new TradingView.widget({
+    tvWidget = new TradingView.widget({
         autosize:true,
         symbol:symbol,
         interval:"D",
@@ -135,25 +152,42 @@ function updateStockChart(symbolInput){
         theme:"light",
         style:"1",
         locale:"zh_CN",
-
         toolbar_bg:"#f1f3f6",
         enable_publishing:false,
-
         hide_top_toolbar:false,
         hide_side_toolbar:false,
         hide_legend:false,
-
-        save_image:true,
-
+        save_image:false,  // 关闭默认相机，避免跳转
         container_id:"stock-chart-container",
         studies:["RSI@tv-basicstudies"]
     });
 }
 
+// 页面加载默认图表
 window.onload = function(){
     loadChart("UKOIL");
 };
 
+// 复制图表按钮
+document.getElementById('copy-chart').addEventListener('click', async function() {
+    const container = document.getElementById('stock-chart-container');
+
+    try {
+        const canvas = await html2canvas(container, {useCORS:true});
+        canvas.toBlob(async function(blob) {
+            try {
+                await navigator.clipboard.write([
+                    new ClipboardItem({ "image/png": blob })
+                ]);
+                alert("图表已复制到剪贴板！");
+            } catch (err) {
+                alert("复制失败：" + err);
+            }
+        });
+    } catch(e){
+        alert("截图失败，可能是跨域iframe限制！");
+    }
+});
 </script>
 
 </body>
