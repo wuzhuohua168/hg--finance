@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HG Investing 工作台 Pro</title>
 
 <script src="https://s3.tradingview.com/tv.js"></script>
@@ -19,9 +19,10 @@ body{
     background:#f0f3f7;
     font-family:-apple-system,sans-serif;
     height:100vh;
+    height:100dvh;   /* ✅ 关键：解决 iPad 时间轴问题 */
     display:flex;
     flex-direction:column;
-    overflow:hidden; /* ✅ 页面不滚动 */
+    overflow:hidden;
 }
 
 /* 主区域 */
@@ -68,7 +69,7 @@ input{
 
 /* 图表区域 */
 #stock-chart-container{
-    flex:1;              /* ✅ 关键 */
+    flex:1;
     width:100%;
 }
 
