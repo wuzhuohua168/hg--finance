@@ -3,103 +3,183 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>HG investing工作台 Pro</title>
+<title>HG Investing 工作台 Pro</title>
 
 <script src="https://s3.tradingview.com/tv.js"></script>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{background:#f0f3f7;font-family:-apple-system,sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
-.tab-content{display:block;padding:10px;flex:1;overflow-y:auto;padding-bottom:80px;}
-.tab-bar{position:fixed;bottom:0;left:0;width:100%;height:60px;background:#fff;display:flex;border-top:1px solid #e0e0e0;z-index:9999;}
-.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#4a90e2;font-size:10px;font-weight:bold;}
-.tab-icon{font-size:20px;margin-bottom:2px;}
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+body{
+    background:#f0f3f7;
+    font-family:-apple-system,sans-serif;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden; /* ✅ 页面不滚动 */
+}
+
+/* 主区域 */
+.main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+
+/* 控制区 */
+.control-panel{
+    background:#fff;
+    padding:10px;
+    border-bottom:1px solid #eee;
+}
+
+/* 快捷按钮 */
+.chart-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:6px;
+    margin-bottom:10px;
+}
+
 .chart-btn{
-background:#f1f3f6;
-border:none;
-padding:8px;
-font-size:12px;
-border-radius:6px;
-cursor:pointer;
+    background:#f1f3f6;
+    border:none;
+    padding:8px;
+    font-size:12px;
+    border-radius:6px;
+    cursor:pointer;
 }
+
 .chart-btn:hover{
-background:#4a90e2;
-color:#fff;
+    background:#4a90e2;
+    color:#fff;
 }
+
 input{
-padding:8px;
-border-radius:6px;
-border:1px solid #ddd;
+    padding:8px;
+    border-radius:6px;
+    border:1px solid #ddd;
+}
+
+/* 图表区域 */
+#stock-chart-container{
+    flex:1;              /* ✅ 关键 */
+    width:100%;
+}
+
+/* 底部Tab */
+.tab-bar{
+    height:60px;
+    background:#fff;
+    display:flex;
+    border-top:1px solid #e0e0e0;
+}
+
+.tab-item{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    color:#4a90e2;
+    font-size:10px;
+    font-weight:bold;
+}
+
+.tab-icon{
+    font-size:20px;
+    margin-bottom:2px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="tab-content">
+<div class="main">
 
-<div style="padding:10px;background:#fff;border-bottom:1px solid #eee;border-radius:12px;">
+    <!-- 控制区 -->
+    <div class="control-panel">
 
-<!-- 快捷按钮 -->
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;">
-<button onclick="loadChart('DXY')" class="chart-btn">DXY</button>
-<button onclick="loadChart('XAUUSD')" class="chart-btn">XAUUSD</button>
-<button onclick="loadChart('XAGUSD')" class="chart-btn">XAGUSD</button>
-<button onclick="loadChart('COPPER')" class="chart-btn">COPPER</button>
-<button onclick="loadChart('UKOIL')" class="chart-btn">UKOIL</button>
-<button onclick="loadChart('XAUUSD/TVC:UKOIL')" class="chart-btn">金油比</button>
-<button onclick="loadChart('XAGUSD/TVC:UKOIL')" class="chart-btn">银油比</button>
-<button onclick="loadChart('COPPER/TVC:UKOIL')" class="chart-btn">铜油比</button>
-<button onclick="loadChart('CNYJPY')" class="chart-btn">CNY/JPY</button>
+        <div class="chart-grid">
+            <button onclick="loadChart('DXY')" class="chart-btn">DXY</button>
+            <button onclick="loadChart('XAUUSD')" class="chart-btn">XAUUSD</button>
+            <button onclick="loadChart('XAGUSD')" class="chart-btn">XAGUSD</button>
+            <button onclick="loadChart('COPPER')" class="chart-btn">COPPER</button>
+            <button onclick="loadChart('UKOIL')" class="chart-btn">UKOIL</button>
+            <button onclick="loadChart('XAUUSD/TVC:UKOIL')" class="chart-btn">金油比</button>
+            <button onclick="loadChart('XAGUSD/TVC:UKOIL')" class="chart-btn">银油比</button>
+            <button onclick="loadChart('COPPER/TVC:UKOIL')" class="chart-btn">铜油比</button>
+            <button onclick="loadChart('CNYJPY')" class="chart-btn">CNY/JPY</button>
+        </div>
+
+        <div style="display:flex;gap:5px;">
+            <input type="text" id="stock-search" placeholder="自定义代码 如 BTCUSDT" style="flex:1;">
+            <button onclick="updateStockChart()" 
+            style="background:#4a90e2;color:#fff;border:none;padding:0 15px;border-radius:8px;">
+            查看
+            </button>
+        </div>
+
+    </div>
+
+    <!-- 图表 -->
+    <div id="stock-chart-container"></div>
+
 </div>
 
-<!-- 自定义输入 -->
-<div style="display:flex;gap:5px;">
-<input type="text" id="stock-search" placeholder="自定义代码 如 BTCUSDT" style="flex:1;">
-<button onclick="updateStockChart()" style="background:#4a90e2;color:#fff;border:none;padding:0 15px;border-radius:8px;">查看</button>
-</div>
-
-</div>
-
-<!-- 图表区域 -->
-<div id="stock-chart-container" style="width:100%;height:calc(100vh - 150px);margin-top:50px;"></div>
-
-</div>
-
+<!-- 底部导航 -->
 <div class="tab-bar">
-<div class="tab-item"><span class="tab-icon">📈</span><span>宏观面板</span></div>
+    <div class="tab-item">
+        <span class="tab-icon">📈</span>
+        <span>宏观面板</span>
+    </div>
 </div>
 
 <script>
 
 function loadChart(symbol){
-document.getElementById('stock-search').value=symbol;
-updateStockChart(symbol);
+    document.getElementById('stock-search').value = symbol;
+    updateStockChart(symbol);
 }
 
 function updateStockChart(symbolInput){
-const symbol=symbolInput||document.getElementById('stock-search').value||"XAUUSD/UKOIL";
-document.getElementById('stock-chart-container').innerHTML='';
 
-new TradingView.widget({
-autosize:true,
-symbol:symbol,
-interval:"D",
-timezone:"Etc/UTC",
-theme:"light",
-style:"1",
-locale:"zh_CN",
-toolbar_bg:"#f1f3f6",
-enable_publishing:false,
-hide_top_toolbar:false,   // 保留顶部工具栏
-save_image:true,          // 开启官方图表快照
-container_id:"stock-chart-container",
-studies:["RSI@tv-basicstudies"]
-});
+    const symbol = symbolInput || 
+                   document.getElementById('stock-search').value || 
+                   "XAUUSD/UKOIL";
+
+    document.getElementById('stock-chart-container').innerHTML = '';
+
+    new TradingView.widget({
+        autosize:true,
+        symbol:symbol,
+        interval:"D",
+        timezone:"Etc/UTC",
+        theme:"light",
+        style:"1",
+        locale:"zh_CN",
+
+        toolbar_bg:"#f1f3f6",
+        enable_publishing:false,
+
+        hide_top_toolbar:false,
+        hide_side_toolbar:false,
+        hide_legend:false,
+
+        save_image:true,
+
+        container_id:"stock-chart-container",
+        studies:["RSI@tv-basicstudies"]
+    });
 }
 
-window.onload=function(){
-loadChart("UKOIL");
+window.onload = function(){
+    loadChart("UKOIL");
 };
 
 </script>
