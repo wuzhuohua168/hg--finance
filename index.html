@@ -19,27 +19,24 @@ body{
     background:#f0f3f7;
     font-family:-apple-system,sans-serif;
     height:100vh;
-    height:100dvh;   /* 兼容 iPad */
+    height:100dvh;
     display:flex;
     flex-direction:column;
     overflow:hidden;
 }
 
-/* 主区域 */
 .main{
     flex:1;
     display:flex;
     flex-direction:column;
 }
 
-/* 控制区 */
 .control-panel{
     background:#fff;
     padding:10px;
     border-bottom:1px solid #eee;
 }
 
-/* 快捷按钮 */
 .chart-grid{
     display:grid;
     grid-template-columns:repeat(3,1fr);
@@ -47,18 +44,30 @@ body{
     margin-bottom:10px;
 }
 
-.chart-btn{
+.quote-tile{
+    position:relative;
     background:#f1f3f6;
-    border:none;
-    padding:8px;
-    font-size:12px;
-    border-radius:6px;
-    cursor:pointer;
+    border-radius:8px;
+    overflow:hidden;
+    height:58px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 8px;
 }
 
-.chart-btn:hover{
-    background:#4a90e2;
-    color:#fff;
+.quote-label{
+    font-size:11px;
+    color:#555;
+    pointer-events:none;
+    white-space:nowrap;
+}
+
+.quote-click{
+    position:absolute;
+    inset:0;
+    cursor:pointer;
+    z-index:3;
 }
 
 input{
@@ -67,7 +76,6 @@ input{
     border:1px solid #ddd;
 }
 
-/* 图表区域 */
 #stock-chart-container{
     flex:1;
     width:100%;
@@ -79,27 +87,13 @@ input{
 
 <div class="main">
 
-    <!-- 控制区 -->
     <div class="control-panel">
 
-        <div class="chart-grid">
-            <button onclick="loadChart('DXY')" class="chart-btn">DXY</button>
-            <button onclick="loadChart('XAUUSD')" class="chart-btn">XAUUSD</button>
-            <button onclick="loadChart('XAGUSD')" class="chart-btn">XAGUSD</button>
-            <button onclick="loadChart('COPPER')" class="chart-btn">COPPER</button>
-            <button onclick="loadChart('UKOIL')" class="chart-btn">UKOIL</button>
-           <button onclick="loadChart('BTCUSD')" class="chart-btn">BTCUSD</button>
-            <button onclick="loadChart('XAUUSD/XAGUSD')" class="chart-btn">金银比</button>
-            <button onclick="loadChart('XAUUSD/UKOIL')" class="chart-btn">金油比</button>
-            <button onclick="loadChart('COPPER/UKOIL')" class="chart-btn">铜油比</button>              
-            <button onclick="loadChart('XAUUSD/BTCUSD')" class="chart-btn">金币比</button>  
-            <button onclick="loadChart('USDCNY')" class="chart-btn">USDCNY</button>
-            <button onclick="loadChart('JPYCNY')" class="chart-btn">JPYCNY</button>
-        </div>
+        <div class="chart-grid" id="quote-grid"></div>
 
         <div style="display:flex;gap:5px;">
             <input type="text" id="stock-search" placeholder="自定义代码 如 BTCUSDT" style="flex:1;">
-            <button onclick="updateStockChart()" 
+            <button onclick="updateStockChart()"
             style="background:#4a90e2;color:#fff;border:none;padding:0 15px;border-radius:8px;">
             查看
             </button>
@@ -107,12 +101,92 @@ input{
 
     </div>
 
-    <!-- 图表 -->
     <div id="stock-chart-container"></div>
 
 </div>
 
 <script>
+const quickSymbols = [
+    { label: "DXY", symbol: "DXY" },
+    { label: "XAUUSD", symbol: "XAUUSD" },
+    { label: "XAGUSD", symbol: "XAGUSD" },
+    { label: "COPPER", symbol: "COPPER" },
+    { label: "UKOIL", symbol: "UKOIL" },
+    { label: "BTCUSD", symbol: "BTCUSD" },
+    { label: "金银比", symbol: "XAUUSD/XAGUSD" },
+    { label: "金油比", symbol: "XAUUSD/UKOIL" },
+    { label: "铜油比", symbol: "COPPER/UKOIL" },
+    { label: "金币比", symbol: "XAUUSD/BTCUSD" },
+    { label: "USDCNY", symbol: "USDCNY" },
+    { label: "JPYCNY", symbol: "JPYCNY" }
+];
+
+const tvSymbolMap = {
+    "DXY": "TVC:DXY",
+    "XAUUSD": "XAUUSD",
+    "XAGUSD": "XAGUSD",
+    "COPPER": "COPPER",
+    "UKOIL": "UKOIL",
+    "BTCUSD": "BTCUSD",
+    "XAUUSD/XAGUSD": "XAUUSD/XAGUSD",
+    "XAUUSD/UKOIL": "XAUUSD/UKOIL",
+    "COPPER/UKOIL": "COPPER/UKOIL",
+    "XAUUSD/BTCUSD": "XAUUSD/BTCUSD",
+    "USDCNY": "USDCNY",
+    "JPYCNY": "JPYCNY"
+};
+
+function appendSingleQuoteWidget(container, symbol){
+    const script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js";
+    script.async = true;
+    script.innerHTML = JSON.stringify({
+        symbol: tvSymbolMap[symbol] || symbol,
+        width: "100%",
+        colorTheme: "light",
+        isTransparent: true,
+        locale: "zh_CN",
+        showSymbolLogo: false,
+        fontSize: "1"
+    });
+    container.appendChild(script);
+}
+
+function renderQuoteGrid(){
+    const grid = document.getElementById("quote-grid");
+    grid.innerHTML = "";
+
+    quickSymbols.forEach(item => {
+        const tile = document.createElement("div");
+        tile.className = "quote-tile";
+
+        const label = document.createElement("div");
+        label.className = "quote-label";
+        label.textContent = item.label;
+
+        const widgetWrap = document.createElement("div");
+        widgetWrap.className = "tradingview-widget-container";
+        widgetWrap.style.height = "100%";
+        widgetWrap.style.flex = "1";
+
+        const widgetTarget = document.createElement("div");
+        widgetTarget.className = "tradingview-widget-container__widget";
+        widgetTarget.style.height = "100%";
+
+        widgetWrap.appendChild(widgetTarget);
+        appendSingleQuoteWidget(widgetWrap, item.symbol);
+
+        const click = document.createElement("div");
+        click.className = "quote-click";
+        click.onclick = () => loadChart(item.symbol);
+
+        tile.appendChild(label);
+        tile.appendChild(widgetWrap);
+        tile.appendChild(click);
+        grid.appendChild(tile);
+    });
+}
 
 function loadChart(symbol){
     document.getElementById('stock-search').value = symbol;
@@ -121,15 +195,15 @@ function loadChart(symbol){
 
 function updateStockChart(symbolInput){
 
-    const symbol = symbolInput || 
-                   document.getElementById('stock-search').value || 
+    const symbol = symbolInput ||
+                   document.getElementById('stock-search').value ||
                    "XAUUSD/UKOIL";
 
     document.getElementById('stock-chart-container').innerHTML = '';
 
     new TradingView.widget({
         autosize:true,
-        symbol:symbol,
+        symbol: tvSymbolMap[symbol] || symbol,
         interval:"D",
         timezone:"Etc/UTC",
         theme:"light",
@@ -151,9 +225,9 @@ function updateStockChart(symbolInput){
 }
 
 window.onload = function(){
+    renderQuoteGrid();
     loadChart("UKOIL");
 };
-
 </script>
 
 </body>
