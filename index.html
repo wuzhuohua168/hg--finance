@@ -97,6 +97,10 @@ input{
             style="background:#4a90e2;color:#fff;border:none;padding:0 15px;border-radius:8px;">
             查看
             </button>
+            <button onclick="openSnapshot()"
+            style="background:#2f7b5b;color:#fff;border:none;padding:0 12px;border-radius:8px;">
+            保存图片
+            </button>
         </div>
 
     </div>
@@ -222,6 +226,14 @@ function updateStockChart(symbolInput){
         container_id:"stock-chart-container",
         studies:["RSI@tv-basicstudies"]
     });
+}
+
+function openSnapshot(){
+    const input = document.getElementById('stock-search').value || "XAUUSD/UKOIL";
+    const sym = (input || "").trim().toUpperCase();
+    const tvSym = tvSymbolMap[sym] || sym;
+    const url = "https://www.tradingview.com/chart/?symbol=" + encodeURIComponent(tvSym);
+    window.open(url, "_blank", "noopener");
 }
 
 window.onload = function(){
