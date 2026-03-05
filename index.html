@@ -49,7 +49,7 @@ body{
     background:#f1f3f6;
     border-radius:8px;
     overflow:hidden;
-    height:58px;
+    height:54px;
     display:flex;
     align-items:center;
     gap:6px;
@@ -57,7 +57,7 @@ body{
 }
 
 .quote-label{
-    font-size:11px;
+    font-size:10px;
     color:#555;
     pointer-events:none;
     white-space:nowrap;
@@ -93,14 +93,14 @@ input{
         grid-template-columns:repeat(2,1fr);
     }
     .quote-tile{
-        height:56px;
+        height:52px;
         padding:6px;
     }
     .quote-label{
         font-size:10px;
     }
     .quote-tile .tradingview-widget-container{
-        transform:scale(0.8);
+        transform:scale(0.7);
         transform-origin:left center;
     }
     #stock-chart-container{
@@ -152,8 +152,9 @@ input{
 
 <script>
 const quickSymbols = [
-    { label: "USDCNY", symbol: "USDCNY" },
-    { label: "JPYCNY", symbol: "JPYCNY" }
+    { label: "XAUUSD", symbol: "XAUUSD" },
+    { label: "COPPER", symbol: "COPPER" },
+    { label: "UKOIL", symbol: "UKOIL" },
     { label: "股油比", symbol: "SP500/WTI" },
     { label: "铜油比", symbol: "COPPER/WTI" },
     { label: "金油比", symbol: "XAUUSD/WTI" },
@@ -161,16 +162,14 @@ const quickSymbols = [
     { label: "DXY", symbol: "DXY" },
     { label: "BTCUSD", symbol: "BTCUSD" },
     { label: "金币比", symbol: "XAUUSD/BTCUSD" },
-    { label: "XAUUSD", symbol: "XAUUSD" },
-    { label: "COPPER", symbol: "COPPER" },
-    { label: "UKOIL", symbol: "UKOIL" },
-   
-   
+    { label: "USDCNY", symbol: "USDCNY" },
+    { label: "JPYCNY", symbol: "JPYCNY" }
 ];
 
 const tvSymbolMap = {
-    "USDCNY": "USDCNY",
-    "JPYCNY": "JPYCNY"
+    "XAUUSD": "XAUUSD",
+    "COPPER": "COPPER",
+    "UKOIL": "UKOIL",
     "SP500/WTI": "SP500/WTI",
     "COPPER/WTI": "COPPER/WTI",
     "XAUUSD/WTI": "XAUUSD/WTI",
@@ -178,10 +177,8 @@ const tvSymbolMap = {
     "DXY": "DXY",
     "BTCUSD": "BTCUSD",
     "XAUUSD/BTCUSD": "XAUUSD/BTCUSD",
-    "XAUUSD": "XAUUSD",
-    "COPPER": "COPPER",
-    "UKOIL": "UKOIL",
-  
+    "USDCNY": "USDCNY",
+    "JPYCNY": "JPYCNY"
 };
 
 function appendSingleQuoteWidget(container, symbol){
@@ -196,7 +193,7 @@ function appendSingleQuoteWidget(container, symbol){
         isTransparent: true,
         locale: "zh_CN",
         showSymbolLogo: false,
-        fontSize: "8"
+        fontSize: "6"
     });
     container.appendChild(script);
 }
