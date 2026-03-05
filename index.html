@@ -4,368 +4,268 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HG Investing Pro</title>
-
 <script src="https://s3.tradingview.com/tv.js"></script>
-
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
--webkit-tap-highlight-color:transparent;
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:#f0f3f7;font-family:-apple-system,sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+.main{flex:1;display:flex;flex-direction:column;}
+.control-panel{background:#fff;padding:10px;border-bottom:1px solid #eee;}
+.chart-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px;}
+.quote-tile{position:relative;background:#f1f3f6;border-radius:8px;overflow:hidden;height:54px;display:flex;align-items:center;gap:6px;padding:6px 8px;cursor:pointer;}
+.quote-label{font-size:10px;color:#555;pointer-events:none;white-space:nowrap;}
+.quote-click{position:absolute;inset:0;cursor:pointer;z-index:3;}
+input{padding:8px;border-radius:6px;border:1px solid #ddd;flex:1;}
+#stock-chart-container{flex:1;width:100%;position:relative;z-index:1;}
+#cycle-bar{display:flex;gap:6px;padding:6px;background:#fff;border-top:1px solid #eee;}
+.cycle-btn{padding:4px 10px;font-size:12px;background:#f3f4f6;border-radius:6px;cursor:pointer;}
+.cycle-btn:hover{background:#dbeafe;}
+.cycle-btn.active{background:#dbeafe;color:#1e40af;font-weight:bold;}
+#macroLight{margin:6px 0;padding:6px;border-radius:6px;font-size:12px;background:#3b82f6;color:#fff;}
+#macroAdvice{margin:6px 0;padding:6px;border-radius:6px;font-size:12px;background:#e0f2fe;color:#000;}
+#translate-panel,#news-panel{display:none;flex:1;border-top:1px solid #eee;}
+.signal{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;}
+.green{background:#00ff90;}
+.yellow{background:#ffd000;}
+.red{background:#ff4040;}
+@media(max-width:768px){
+body{overflow:auto;}
+.main{flex:initial;min-height:100dvh;}
+.chart-grid{grid-template-columns:repeat(2,1fr);}
+#stock-chart-container,#translate-panel,#news-panel{min-height:100dvh;}
 }
-
-body{
-background:#f0f3f7;
-font-family:-apple-system,sans-serif;
-height:100vh;
-height:100dvh;
-display:flex;
-flex-direction:column;
-overflow:hidden;
-}
-
-.main{
-flex:1;
-display:flex;
-flex-direction:column;
-}
-
-.control-panel{
-background:#fff;
-padding:10px;
-border-bottom:1px solid #eee;
-}
-
-.chart-grid{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:6px;
-margin-bottom:10px;
-}
-
-.quote-tile{
-position:relative;
-background:#f1f3f6;
-border-radius:8px;
-overflow:hidden;
-height:54px;
-display:flex;
-align-items:center;
-gap:6px;
-padding:6px 8px;
-}
-
-.quote-label{
-font-size:10px;
-color:#555;
-pointer-events:none;
-white-space:nowrap;
-}
-
-.quote-click{
-position:absolute;
-inset:0;
-cursor:pointer;
-z-index:3;
-}
-
-input{
-padding:8px;
-border-radius:6px;
-border:1px solid #ddd;
-}
-
-#stock-chart-container{
-flex:1;
-width:100%;
-position:relative;
-}
-
-#cycle-bar{
-display:flex;
-gap:6px;
-padding:6px;
-background:#fff;
-border-top:1px solid #eee;
-}
-
-.cycle-btn{
-padding:4px 10px;
-font-size:12px;
-background:#f3f4f6;
-border-radius:6px;
-cursor:pointer;
-}
-
-.cycle-btn:hover{
-background:#dbeafe;
-}
-
-@media (max-width:768px){
-
-body{
-overflow:auto;
-}
-
-.main{
-flex:initial;
-min-height:100dvh;
-}
-
-.chart-grid{
-grid-template-columns:repeat(2,1fr);
-}
-
-#stock-chart-container{
-min-height:100dvh;
-}
-
-#translate-panel,
-#news-panel{
-min-height:100dvh;
-}
-
-}
-
 </style>
 </head>
-
 <body>
 
 <div class="main">
+    <div class="control-panel">
+        <div class="chart-grid" id="quote-grid"></div>
 
-<div class="control-panel">
+        <div style="display:flex;gap:5px;margin-top:4px;">
+            <input type="text" id="stock-search" placeholder="自定义代码 如 BTCUSDT">
+            <button onclick="updateStockChart()" style="background:#4a90e2;color:#fff;border:none;padding:0 15px;border-radius:8px;">check</button>
+            <button onclick="toggleTranslate()" style="background:#6a5acd;color:#fff;border:none;padding:0 12px;border-radius:8px;">war</button>
+            <button onclick="toggleNews()" style="background:#ff6a00;color:#fff;border:none;padding:0 12px;border-radius:8px;">news</button>
+            <button onclick="macroCheck()" style="background:#f59e0b;color:#fff;border:none;padding:0 12px;border-radius:8px;">Mac</button>
+        </div>
 
-<div class="chart-grid" id="quote-grid"></div>
+        <div id="macroLight">刷新宏观信号</div>
+        <div id="macroAdvice"></div>
+    </div>
 
-<div style="display:flex;gap:5px;">
-<input type="text" id="stock-search" placeholder="如 BTCUSD" style="flex:1;">
-<button onclick="updateStockChart()"
-style="background:#4a90e2;color:#fff;border:none;padding:0 15px;border-radius:8px;">
-check
-</button>
+    <div id="stock-chart-container"></div>
 
-<button onclick="toggleTranslate()"
-style="background:#6a5acd;color:#fff;border:none;padding:0 12px;border-radius:8px;">
-war
-</button>
+    <!-- 周期栏 -->
+    <div id="cycle-bar">
+        <div class="cycle-btn" onclick="setCycle('D', this)">日</div>
+        <div class="cycle-btn" onclick="setCycle('W', this)">周</div>
+        <div class="cycle-btn" onclick="setCycle('M', this)">月</div>
+        <div class="cycle-btn" onclick="setRange('ytd', this)">YTD</div>
+        <div class="cycle-btn" onclick="setRange('12m', this)">1Y</div>
+        <div class="cycle-btn" onclick="setRange('60m', this)">5Y</div>
+        <div class="cycle-btn" onclick="setRange('all', this)">ALL</div>
+    </div>
 
-<button onclick="toggleNews()"
-style="background:#ff6a00;color:#fff;border:none;padding:0 12px;border-radius:8px;">
-news
-</button>
-</div>
-
-</div>
-
-<div id="stock-chart-container"></div>
-
-<div id="cycle-bar">
-
-<div class="cycle-btn" onclick="setCycle('D')">日</div>
-<div class="cycle-btn" onclick="setCycle('W')">周</div>
-<div class="cycle-btn" onclick="setCycle('M')">月</div>
-
-<div class="cycle-btn" onclick="setRange('ytd')">YTD</div>
-<div class="cycle-btn" onclick="setRange('12m')">1Y</div>
-<div class="cycle-btn" onclick="setRange('60m')">5Y</div>
-<div class="cycle-btn" onclick="setRange('all')">ALL</div>
-
-</div>
-
-<div id="translate-panel" style="display:none;flex:1;">
-<iframe src="https://iran.immersivetranslate.com/zh-CN/" style="width:100%;height:100%;border:0;"></iframe>
-</div>
-
-<div id="news-panel" style="display:none;flex:1;">
-<iframe src="https://www.jin10.com/" style="width:100%;height:100%;border:0;"></iframe>
-</div>
-
+    <div id="translate-panel">
+        <iframe src="https://iran.immersivetranslate.com/zh-CN/" style="width:100%;height:100%;border:0;"></iframe>
+    </div>
+    <div id="news-panel">
+        <iframe src="https://www.jin10.com/" style="width:100%;height:100%;border:0;"></iframe>
+    </div>
 </div>
 
 <script>
-
-let widget
-let tvChart
+let widget, tvChart;
 
 const quickSymbols = [
-{ label:"USDCNY",symbol:"FX_IDC:USDCNY"},
-{ label:"JPYCNY",symbol:"FX_IDC:JPYCNY"},
-{ label:"XAUUSD",symbol:"OANDA:XAUUSD"},
-{ label:"COPPER",symbol:"COMEX:HG1!"},
-{ label:"UKOIL",symbol:"TVC:UKOIL"},
-{ label:"股油比",symbol:"SP:SPX/TVC:USOIL"},
-{ label:"铜油比",symbol:"COMEX:HG1!/TVC:USOIL"},
-{ label:"金油比",symbol:"OANDA:XAUUSD/TVC:USOIL"},
-{ label:"US10Y",symbol:"TVC:US10Y"},
-{ label:"DXY",symbol:"TVC:DXY"},
-{ label:"BTCUSD",symbol:"BINANCE:BTCUSDT"},
-{ label:"金币比",symbol:"OANDA:XAUUSD/BINANCE:BTCUSDT"}
-]
+    { label:"USDCNY",symbol:"USDCNY"},
+    { label:"JPYCNY",symbol:"JPYCNY"},
+    { label:"XAUUSD",symbol:"XAUUSD"},
+    { label:"COPPER",symbol:"COPPER"},
+    { label:"UKOIL",symbol:"UKOIL"},
+    { label:"股油比",symbol:"SP500/WTI"},
+    { label:"铜油比",symbol:"COPPER/WTI"},
+    { label:"金油比",symbol:"XAUUSD/WTI"},
+    { label:"US10Y",symbol:"US10Y"},
+    { label:"DXY",symbol:"DXY"},
+    { label:"BTCUSD",symbol:"BTCUSD"},
+    { label:"金币比",symbol:"XAUUSD/BTCUSD"}
+];
+
+const tvSymbolMap = {
+"USDCNY":"USDCNY","JPYCNY":"JPYCNY","XAUUSD":"XAUUSD","COPPER":"COPPER",
+"UKOIL":"UKOIL","SP500/WTI":"SP500/WTI","COPPER/WTI":"COPPER/WTI","XAUUSD/WTI":"XAUUSD/WTI",
+"US10Y":"US10Y","DXY":"DXY","BTCUSD":"BTCUSD","XAUUSD/BTCUSD":"XAUUSD/BTCUSD"
+};
+
+function appendSingleQuoteWidget(container, symbol){
+    const script=document.createElement("script");
+    script.type="text/javascript";
+    script.src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js";
+    script.async=true;
+    script.innerHTML=JSON.stringify({
+        symbol: tvSymbolMap[symbol] || symbol,
+        width:"100%",
+        colorTheme:"light",
+        isTransparent:true,
+        locale:"zh_CN",
+        showSymbolLogo:false,
+        fontSize:"6"
+    });
+    container.appendChild(script);
+}
 
 function renderQuoteGrid(){
+    const grid=document.getElementById("quote-grid");
+    grid.innerHTML="";
+    quickSymbols.forEach(item=>{
+        const tile=document.createElement("div");
+        tile.className="quote-tile";
 
-const grid=document.getElementById("quote-grid")
-grid.innerHTML=""
+        const label=document.createElement("div");
+        label.className="quote-label";
+        label.textContent=item.label;
 
-quickSymbols.forEach(item=>{
+        const widgetWrap=document.createElement("div");
+        widgetWrap.className="tradingview-widget-container";
+        widgetWrap.style.height="100%";
+        widgetWrap.style.flex="1";
 
-const tile=document.createElement("div")
-tile.className="quote-tile"
+        const widgetTarget=document.createElement("div");
+        widgetTarget.className="tradingview-widget-container__widget";
+        widgetTarget.style.height="100%";
 
-tile.innerHTML=`<div class="quote-label">${item.label}</div>`
+        widgetWrap.appendChild(widgetTarget);
+        appendSingleQuoteWidget(widgetWrap, item.symbol);
 
-tile.onclick=()=>loadChart(item.symbol)
+        const click=document.createElement("div");
+        click.className="quote-click";
+        click.onclick=()=>loadChart(item.symbol);
 
-grid.appendChild(tile)
-
-})
-
+        tile.appendChild(label);
+        tile.appendChild(widgetWrap);
+        tile.appendChild(click);
+        grid.appendChild(tile);
+    });
 }
 
 function loadChart(symbol){
-
-document.getElementById('stock-search').value=symbol
-updateStockChart(symbol)
-
+    document.getElementById('stock-search').value=symbol;
+    updateStockChart(symbol);
 }
 
 function updateStockChart(symbolInput){
-
-const symbol=symbolInput||
-document.getElementById('stock-search').value||
-"TVC:UKOIL"
-
-document.getElementById("stock-chart-container").innerHTML=""
-
-widget=new TradingView.widget({
-
-autosize:true,
-symbol:symbol,
-interval:"D",
-timezone:"Etc/UTC",
-theme:"light",
-style:"1",
-locale:"zh_CN",
-
-toolbar_bg:"#f1f3f6",
-
-enable_publishing:false,
-
-hide_top_toolbar:false,
-hide_side_toolbar:false,
-hide_legend:false,
-
-save_image:true,
-
-container_id:"stock-chart-container",
-
-studies:["RSI@tv-basicstudies"]
-
-})
-
-widget.onChartReady(()=>{
-
-tvChart=widget.chart()
-
-})
-
+    const symbol=symbolInput || document.getElementById('stock-search').value || "XAUUSD/UKOIL";
+    document.getElementById('stock-chart-container').innerHTML='';
+    widget=new TradingView.widget({
+        autosize:true,
+        symbol: tvSymbolMap[symbol] || symbol,
+        interval:"D",
+        timezone:"Etc/UTC",
+        theme:"light",
+        style:"1",
+        locale:"zh_CN",
+        toolbar_bg:"#f1f3f6",
+        enable_publishing:false,
+        hide_top_toolbar:false,
+        hide_side_toolbar:false,
+        hide_legend:false,
+        save_image:true,
+        container_id:"stock-chart-container",
+        studies:["RSI@tv-basicstudies"]
+    });
+    widget.onChartReady(()=>{tvChart=widget.chart();});
 }
 
-function setCycle(cycle){
-
-if(!tvChart)return
-tvChart.setResolution(cycle)
-
+// 周期栏逻辑
+function highlightButton(btn) {
+    const buttons = document.querySelectorAll('.cycle-btn');
+    buttons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
 }
 
-function setRange(type){
-
-if(!tvChart)return
-
-const now=Math.floor(Date.now()/1000)
-
-let from
-
-if(type==="ytd"){
-
-const year=new Date().getFullYear()
-from=Math.floor(new Date(year,0,1)/1000)
-
+function setCycle(cycle, btn) {
+    if(tvChart) tvChart.setResolution(cycle);
+    highlightButton(btn);
 }
 
-if(type==="12m") from=now-31536000
-if(type==="60m") from=now-31536000*5
-if(type==="all") from=0
-
-tvChart.setVisibleRange({
-
-from:from,
-to:now
-
-})
-
+function setRange(type, btn) {
+    if(!tvChart) return;
+    const now=Math.floor(Date.now()/1000);
+    let from;
+    if(type==="ytd"){const year=new Date().getFullYear();from=Math.floor(new Date(year,0,1)/1000);}
+    if(type==="12m") from=now-31536000;
+    if(type==="60m") from=now-31536000*5;
+    if(type==="all") from=0;
+    if(from!==undefined) tvChart.setVisibleRange({from:from,to:now});
+    highlightButton(btn);
 }
 
+// 宏观信号灯 + 投资策略
+function macroCheck(){
+    const goldOil=18,copperOil=3.2,dxy=105,us10y=3.8; 
+    let text="", strategy="";
+    if(us10y>4.8){
+        text=`<span class="signal red"></span>过热风险`;
+        strategy=`<ul>
+            <li>短期美债(T-bills) 50%</li>
+            <li>现金/货币基金 30%</li>
+            <li>避险黄金ETF 20%</li>
+        </ul>`;
+    } else if(goldOil>18 && copperOil>3){
+        text=`<span class="signal green"></span>经济复苏`;
+        strategy=`<ul>
+            <li>标普500指数ETF 40%</li>
+            <li>原油ETF/WTI 20%</li>
+            <li>工业金属ETF/铜 20%</li>
+            <li>成长型科技股 20%</li>
+        </ul>`;
+    } else if(goldOil>20 && copperOil<2){
+        text=`<span class="signal yellow"></span>滞涨风险`;
+        strategy=`<ul>
+            <li>黄金ETF 40%</li>
+            <li>消费必需品ETF 30%</li>
+            <li>优质企业债券 30%</li>
+        </ul>`;
+    } else {
+        text=`<span class="signal red"></span>衰退风险`;
+        strategy=`<ul>
+            <li>国债/高等级企业债券 50%</li>
+            <li>现金/货币基金 30%</li>
+            <li>防御性蓝筹股 20%</li>
+        </ul>`;
+    }
+    document.getElementById("macroLight").innerHTML=text;
+    document.getElementById("macroAdvice").innerHTML=strategy;
+}
+
+// war/news 切换
 function showChart(){
-
-document.getElementById("stock-chart-container").style.display="block"
-document.getElementById("cycle-bar").style.display="flex"
-
-document.getElementById("translate-panel").style.display="none"
-document.getElementById("news-panel").style.display="none"
-
+    document.getElementById("stock-chart-container").style.display="block";
+    document.getElementById("cycle-bar").style.display="flex";
+    document.getElementById("translate-panel").style.display="none";
+    document.getElementById("news-panel").style.display="none";
+    updateStockChart();
 }
-
 function toggleTranslate(){
-
-const panel=document.getElementById("translate-panel")
-const showing=panel.style.display!=="none"
-
-if(showing){
-
-showChart()
-return
-
+    const panel=document.getElementById("translate-panel");
+    if(panel.style.display!=="none"){showChart();return;}
+    panel.style.display="flex";
+    document.getElementById("news-panel").style.display="none";
+    document.getElementById("stock-chart-container").style.display="none";
 }
-
-panel.style.display="flex"
-document.getElementById("news-panel").style.display="none"
-document.getElementById("stock-chart-container").style.display="none"
-document.getElementById("cycle-bar").style.display="none"
-
-}
-
 function toggleNews(){
-
-const panel=document.getElementById("news-panel")
-const showing=panel.style.display!=="none"
-
-if(showing){
-
-showChart()
-return
-
-}
-
-panel.style.display="flex"
-document.getElementById("translate-panel").style.display="none"
-document.getElementById("stock-chart-container").style.display="none"
-document.getElementById("cycle-bar").style.display="none"
-
+    const panel=document.getElementById("news-panel");
+    if(panel.style.display!=="none"){showChart();return;}
+    panel.style.display="flex";
+    document.getElementById("translate-panel").style.display="none";
+    document.getElementById("stock-chart-container").style.display="none";
 }
 
 window.onload=function(){
-
-renderQuoteGrid()
-
-loadChart("TVC:UKOIL")
-
-}
-
+    renderQuoteGrid();
+    loadChart("UKOIL");
+};
 </script>
-
 </body>
 </html>
