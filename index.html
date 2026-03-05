@@ -49,7 +49,7 @@ body{
     background:#f1f3f6;
     border-radius:8px;
     overflow:hidden;
-    height:54px;
+    height:58px;
     display:flex;
     align-items:center;
     gap:6px;
@@ -57,7 +57,7 @@ body{
 }
 
 .quote-label{
-    font-size:10px;
+    font-size:11px;
     color:#555;
     pointer-events:none;
     white-space:nowrap;
@@ -100,7 +100,7 @@ input{
         font-size:10px;
     }
     .quote-tile .tradingview-widget-container{
-        transform:scale(0.7);
+        transform:scale(0.8);
         transform-origin:left center;
     }
     #stock-chart-container{
@@ -152,33 +152,36 @@ input{
 
 <script>
 const quickSymbols = [
-    { label: "DXY", symbol: "DXY" },
-    { label: "XAUUSD", symbol: "XAUUSD" },
-    { label: "XAGUSD", symbol: "XAGUSD" },
-    { label: "COPPER", symbol: "COPPER" },
-    { label: "UKOIL", symbol: "UKOIL" },
-    { label: "BTCUSD", symbol: "BTCUSD" },
-    { label: "金银比", symbol: "XAUUSD/XAGUSD" },
-    { label: "金油比", symbol: "XAUUSD/UKOIL" },
-    { label: "铜油比", symbol: "COPPER/UKOIL" },
-    { label: "金币比", symbol: "XAUUSD/BTCUSD" },
     { label: "USDCNY", symbol: "USDCNY" },
     { label: "JPYCNY", symbol: "JPYCNY" }
+    { label: "股油比", symbol: "SP500/WTI" },
+    { label: "铜油比", symbol: "COPPER/WTI" },
+    { label: "金油比", symbol: "XAUUSD/WTI" },
+    { label: "US10Y", symbol: "US10Y" },
+    { label: "DXY", symbol: "DXY" },
+    { label: "BTCUSD", symbol: "BTCUSD" },
+    { label: "金币比", symbol: "XAUUSD/BTCUSD" },
+    { label: "XAUUSD", symbol: "XAUUSD" },
+    { label: "COPPER", symbol: "COPPER" },
+    { label: "UKOIL", symbol: "UKOIL" },
+   
+   
 ];
 
 const tvSymbolMap = {
-    "DXY": "DXY",
-    "XAUUSD": "XAUUSD",
-    "XAGUSD": "XAGUSD",
-    "COPPER": "COPPER",
-    "UKOIL": "UKOIL",
-    "BTCUSD": "BTCUSD",
-    "XAUUSD/XAGUSD": "XAUUSD/XAGUSD",
-    "XAUUSD/UKOIL": "XAUUSD/UKOIL",
-    "COPPER/UKOIL": "COPPER/UKOIL",
-    "XAUUSD/BTCUSD": "XAUUSD/BTCUSD",
     "USDCNY": "USDCNY",
     "JPYCNY": "JPYCNY"
+    "SP500/WTI": "SP500/WTI",
+    "COPPER/WTI": "COPPER/WTI",
+    "XAUUSD/WTI": "XAUUSD/WTI",
+    "US10Y": "US10Y",
+    "DXY": "DXY",
+    "BTCUSD": "BTCUSD",
+    "XAUUSD/BTCUSD": "XAUUSD/BTCUSD",
+    "XAUUSD": "XAUUSD",
+    "COPPER": "COPPER",
+    "UKOIL": "UKOIL",
+  
 };
 
 function appendSingleQuoteWidget(container, symbol){
@@ -193,7 +196,7 @@ function appendSingleQuoteWidget(container, symbol){
         isTransparent: true,
         locale: "zh_CN",
         showSymbolLogo: false,
-        fontSize: "6"
+        fontSize: "8"
     });
     container.appendChild(script);
 }
